@@ -60,12 +60,19 @@ git clone https://github.com/yourusername/AniWorld.git
 
 ## Screenshots
 
-<p align="center">
-  <img src="screenshots/welcome_screen.png" width="200" alt="Welcome Screen">
-  <img src="screenshots/anime_list.png" width="200" alt="Anime List">
-  <img src="screenshots/search_screen.png" width="200" alt="Search Screen">
-  <img src="screenshots/anime_details.png" width="200" alt="Anime Details">
-</p>
+<img src="https://github.com/user-attachments/assets/6912ef5b-980f-43e7-81de-ce9b3576a414" width="200"/>
+
+<img src="https://github.com/user-attachments/assets/b15122ac-9638-4928-819e-d43d62760d8c" width="200"/>
+
+<img src="https://github.com/user-attachments/assets/0931991d-d97a-4087-958a-b912b29190dd" width="200"/>
+
+<img src="https://github.com/user-attachments/assets/066fb542-1cda-4e88-9c76-6fb6204d0072" width="200"/>
+
+<img src="https://github.com/user-attachments/assets/f1e333bc-6c28-43ac-88cc-a08e4734dc50" width="200"/>
+
+<img src="https://github.com/user-attachments/assets/bfe76509-3af6-45c8-b61d-ae0151820f3f" width="200"/>
+
+
 
 ## App Structure
 
