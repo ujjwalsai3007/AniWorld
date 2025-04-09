@@ -48,15 +48,6 @@ AniWorld integrates with the [Jikan API](https://jikan.moe/) (v4), an unofficial
 - Search functionality
 - Pagination support
 
-## Installation
-
-1. Clone the repository
-```bash
-git clone https://github.com/yourusername/AniWorld.git
-```
-
-2. Open the project in Android Studio
-3. Sync Gradle and run the application on an emulator or physical device
 
 ## Screenshots
 
