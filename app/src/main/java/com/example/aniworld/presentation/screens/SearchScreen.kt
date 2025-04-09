@@ -35,6 +35,11 @@ import coil.compose.AsyncImage
 import com.example.aniworld.data.model.Anime
 import com.example.aniworld.presentation.viewmodel.AnimeViewModel
 import android.util.Log
+import com.example.aniworld.ui.theme.WarmDeep
+import com.example.aniworld.ui.theme.WarmLight
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.statusBars
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,7 +85,9 @@ fun SearchScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
         ) {
             // Search Bar
             SearchBar(
@@ -95,7 +102,7 @@ fun SearchScreen(
                 onClear = { searchQuery = "" },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
                     .focusRequester(focusRequester)
             )
             
@@ -114,9 +121,11 @@ fun SearchScreen(
                 if (searchState.searchResults.isNotEmpty()) {
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(8.dp),
+                        contentPadding = PaddingValues(12.dp),
                         modifier = Modifier.fillMaxSize(),
-                        state = gridState
+                        state = gridState,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(searchState.searchResults) { anime ->
                             AnimeGridItem(
@@ -144,7 +153,7 @@ fun SearchScreen(
                             .fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        CircularProgressIndicator(color = WarmDeep)
                     }
                 }
                 
@@ -159,7 +168,8 @@ fun SearchScreen(
                         CircularProgressIndicator(
                             modifier = Modifier
                                 .align(Alignment.Center)
-                                .size(36.dp)
+                                .size(36.dp),
+                            color = WarmDeep
                         )
                     }
                 }
@@ -180,8 +190,8 @@ fun EmptySearchState() {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = "Search",
-                modifier = Modifier.size(64.dp),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                modifier = Modifier.size(72.dp),
+                tint = WarmDeep.copy(alpha = 0.5f)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -201,12 +211,19 @@ fun ErrorSearchState(error: String) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(24.dp)
         ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Error",
+                modifier = Modifier.size(72.dp),
+                tint = WarmDeep.copy(alpha = 0.5f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Error",
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.error
+                color = WarmDeep
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -214,6 +231,16 @@ fun ErrorSearchState(error: String) {
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center
             )
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = { /* Retry search */ },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = WarmDeep
+                ),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Text("Try Again", fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -234,12 +261,18 @@ fun SearchBar(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp),
-        placeholder = { Text("Search Anime...") },
+        placeholder = { 
+            Text(
+                "Search anime...", 
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            ) 
+        },
         leadingIcon = {
             IconButton(onClick = onBack) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = "Back",
+                    tint = WarmDeep
                 )
             }
         },
@@ -248,20 +281,25 @@ fun SearchBar(
                 IconButton(onClick = onClear) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear search"
+                        contentDescription = "Clear search",
+                        tint = WarmDeep
                     )
                 }
             } else {
                 Icon(
                     imageVector = Icons.Default.Search,
-                    contentDescription = "Search Anime"
+                    contentDescription = "Search",
+                    tint = WarmDeep
                 )
             }
         },
         colors = TextFieldDefaults.textFieldColors(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = WarmLight.copy(alpha = 0.3f),
             focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            unfocusedIndicatorColor = Color.Transparent,
+            cursorColor = WarmDeep,
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
         ),
         singleLine = true,
         keyboardOptions = KeyboardOptions(
@@ -271,6 +309,6 @@ fun SearchBar(
         keyboardActions = KeyboardActions(
             onSearch = { onSearch() }
         ),
-        shape = MaterialTheme.shapes.medium
+        shape = RoundedCornerShape(28.dp)
     )
 } 

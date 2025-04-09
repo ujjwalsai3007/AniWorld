@@ -18,11 +18,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.aniworld.R
+import com.example.aniworld.ui.theme.WarmDeep
+import com.example.aniworld.ui.theme.WarmLight
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.asPaddingValues
 
 @Composable
 fun StartingScreen(
     onGetStartedClick: () -> Unit
 ) {
+    // This is a full-screen image, so we don't need to account for status bar
+    // as the image will flow behind it with the transparent status bar
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -54,18 +61,25 @@ fun StartingScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp),
+                .padding(
+                    start = 32.dp,
+                    end = 32.dp,
+                    top = 24.dp,
+                    bottom = 32.dp + WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+                ),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Bottom
         ) {
             // Welcome text
             Text(
-                text = "Your Gateway to the World of Anime",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
+                text = "Your Gateway to\nthe World of Anime",
+                fontSize = 34.sp,
+                fontWeight = FontWeight.ExtraBold,
                 textAlign = TextAlign.Center,
                 color = Color.White,
-                modifier = Modifier.padding(bottom = 32.dp)
+                lineHeight = 40.sp,
+                letterSpacing = 0.5.sp,
+                modifier = Modifier.padding(bottom = 48.dp)
             )
             
             // Get started button
@@ -73,16 +87,17 @@ fun StartingScreen(
                 onClick = onGetStartedClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp),
-                shape = RoundedCornerShape(30.dp),
+                    .height(64.dp),
+                shape = RoundedCornerShape(32.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = WarmDeep
                 )
             ) {
                 Text(
                     text = "LET'S GO",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
                 )
             }
             

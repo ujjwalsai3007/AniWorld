@@ -10,38 +10,43 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = WarmDeep,
+    secondary = WarmLight,
+    tertiary = WarmDark,
+    background = WarmBackground.copy(alpha = 0.7f),
+    surface = WarmSurface.copy(alpha = 0.7f),
+    onPrimary = WarmText,
+    onSecondary = WarmText,
+    onTertiary = WarmBackground,
+    onBackground = WarmText,
+    onSurface = WarmText
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    primary = WarmDeep,
+    secondary = WarmLight,
+    tertiary = WarmDark,
+    background = WarmBackground,
+    surface = WarmSurface,
+    onPrimary = WarmBackground,
+    onSecondary = WarmText,
+    onTertiary = WarmBackground,
+    onBackground = WarmText,
+    onSurface = WarmText
 )
 
 @Composable
 fun AniWorldTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Set to false to ensure our custom colors are used
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -56,8 +61,12 @@ fun AniWorldTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            // Set transparent status bar for edge-to-edge experience
+            window.statusBarColor = Color.Transparent.toArgb()
+            // Enable edge-to-edge layout
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            // Light or dark status bar icons based on theme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
 
