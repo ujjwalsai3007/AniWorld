@@ -29,10 +29,14 @@ import com.example.aniworld.data.model.Anime
 import com.example.aniworld.presentation.viewmodel.AnimeViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import android.util.Log
+import com.example.aniworld.ui.theme.WarmDeep
+import com.example.aniworld.ui.theme.WarmLight
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.statusBars
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,35 +80,13 @@ fun AnimeListScreen(
                     viewModel.loadAnimeList()
                 }
             } else {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    // Header with buttons
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "Top Anime (${state.animeList.size})",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.weight(1f)
-                        )
-                        
-                        // Refresh button
-                        IconButton(
-                            onClick = { 
-                                Log.d("AnimeListScreen", "Refresh button clicked")
-                                viewModel.loadAnimeList() 
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Refresh"
-                            )
-                        }
-                    }
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
+                ) {
+                    // Spacer for top padding
+                    Spacer(modifier = Modifier.height(8.dp))
                     
                     // Search bar
                     Surface(
@@ -116,25 +98,25 @@ fun AnimeListScreen(
                                 onSearchClick()
                             },
                         shape = RoundedCornerShape(24.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        color = WarmLight.copy(alpha = 0.7f),
                         tonalElevation = 2.dp
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(12.dp),
+                                .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Search,
                                 contentDescription = "Search",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = "Search anime...",
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
@@ -143,9 +125,11 @@ fun AnimeListScreen(
                     Box(modifier = Modifier.fillMaxSize()) {
                         LazyVerticalGrid(
                             columns = GridCells.Fixed(2),
-                            contentPadding = PaddingValues(8.dp),
+                            contentPadding = PaddingValues(12.dp),
                             modifier = Modifier.fillMaxSize(),
-                            state = gridState
+                            state = gridState,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             items(state.animeList) { anime ->
                                 AnimeGridItem(
@@ -173,7 +157,8 @@ fun AnimeListScreen(
                                 CircularProgressIndicator(
                                     modifier = Modifier
                                         .align(Alignment.Center)
-                                        .size(36.dp)
+                                        .size(36.dp),
+                                    color = WarmDeep
                                 )
                             }
                         }
@@ -186,10 +171,10 @@ fun AnimeListScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f)),
+                        .background(MaterialTheme.colorScheme.background.copy(alpha = 0.9f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = WarmDeep)
                 }
             }
         }
@@ -201,27 +186,18 @@ fun ErrorState(error: String, onRetry: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            imageVector = Icons.Default.Refresh,
-            contentDescription = "Error",
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(64.dp)
+            imageVector = Icons.Default.Search,
+            contentDescription = "Error Icon",
+            modifier = Modifier.size(80.dp),
+            tint = WarmDeep.copy(alpha = 0.5f)
         )
         
         Spacer(modifier = Modifier.height(16.dp))
-        
-        Text(
-            text = "Failed to load anime",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.error,
-            textAlign = TextAlign.Center
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
         
         Text(
             text = if (error.contains("400")) {
@@ -239,11 +215,15 @@ fun ErrorState(error: String, onRetry: () -> Unit) {
         Button(
             onClick = onRetry,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary
+                containerColor = WarmDeep
             ),
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(8.dp),
+            shape = RoundedCornerShape(24.dp)
         ) {
-            Text("Try Again")
+            Text(
+                "Try Again", 
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
@@ -256,14 +236,16 @@ fun AnimeGridItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
             .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier.padding(10.dp)
         ) {
             // Anime image
             AsyncImage(
@@ -272,11 +254,11 @@ fun AnimeGridItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clip(RoundedCornerShape(4.dp)),
+                    .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             
             // Anime title
             Text(
@@ -285,10 +267,11 @@ fun AnimeGridItem(
                 fontWeight = FontWeight.Bold,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface
             )
             
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
             
             // Rating with star icon
             Row(
@@ -298,14 +281,15 @@ fun AnimeGridItem(
                 Icon(
                     imageVector = Icons.Default.Star,
                     contentDescription = "Rating",
-                    tint = Color(0xFFFFC107),
-                    modifier = Modifier.size(16.dp)
+                    tint = WarmDeep,
+                    modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "${anime.score ?: "N/A"}",
                     style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = WarmDeep
                 )
             }
             
@@ -313,7 +297,8 @@ fun AnimeGridItem(
             Text(
                 text = "Episodes: ${anime.episodes ?: "N/A"}",
                 style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
         }
     }
