@@ -1,6 +1,7 @@
 package com.example.aniworld.presentation.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -10,8 +11,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,13 +33,10 @@ import androidx.compose.material.icons.filled.Star
 
 @Composable
 fun AnimeListScreen(
+    onAnimeClick: (Int) -> Unit = {},
     viewModel: AnimeViewModel = hiltViewModel()
 ) {
-    val animeList by viewModel.animeList.collectAsState()
-    val isLoading by viewModel.isLoading.collectAsState()
-    val isLoadingMore by viewModel.isLoadingMore.collectAsState()
-    val hasMorePages by viewModel.hasMorePages.collectAsState()
-    val error by viewModel.error.collectAsState()
+    val state = viewModel.state.value
     
     // Grid state to detect when we've scrolled to the bottom
     val gridState = rememberLazyGridState()
@@ -51,7 +47,7 @@ fun AnimeListScreen(
             val lastVisibleItem = gridState.layoutInfo.visibleItemsInfo.lastOrNull()
             lastVisibleItem != null && 
             lastVisibleItem.index >= gridState.layoutInfo.totalItemsCount - 5 && // Load more when 5 items from end
-            hasMorePages && !isLoadingMore
+            !state.isLoadingMore
         }
     }
     
@@ -69,9 +65,9 @@ fun AnimeListScreen(
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            if (animeList.isEmpty() && error != null) {
+            if (state.animeList.isEmpty() && state.error != null) {
                 // Show error state
-                ErrorState(error = error!!) {
+                ErrorState(error = state.error) {
                     viewModel.loadAnimeList()
                 }
             } else {
@@ -85,7 +81,7 @@ fun AnimeListScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "Top Anime (${animeList.size})",
+                            "Top Anime (${state.animeList.size})",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -107,12 +103,15 @@ fun AnimeListScreen(
                             modifier = Modifier.fillMaxSize(),
                             state = gridState
                         ) {
-                            items(animeList) { anime ->
-                                AnimeGridItem(anime = anime)
+                            items(state.animeList) { anime ->
+                                AnimeGridItem(
+                                    anime = anime,
+                                    onClick = { onAnimeClick(anime.id) }
+                                )
                             }
                             
                             // Add an empty item to create space for the loading indicator
-                            if (isLoadingMore) {
+                            if (state.isLoadingMore) {
                                 item { 
                                     Spacer(modifier = Modifier.height(60.dp))
                                 }
@@ -120,7 +119,7 @@ fun AnimeListScreen(
                         }
                         
                         // Loading more indicator at the bottom
-                        if (isLoadingMore) {
+                        if (state.isLoadingMore) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -139,7 +138,7 @@ fun AnimeListScreen(
             }
             
             // Full-screen loading indicator for initial load
-            if (isLoading) {
+            if (state.isLoading) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -206,11 +205,15 @@ fun ErrorState(error: String, onRetry: () -> Unit) {
 }
 
 @Composable
-fun AnimeGridItem(anime: Anime) {
+fun AnimeGridItem(
+    anime: Anime,
+    onClick: () -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(8.dp)
     ) {

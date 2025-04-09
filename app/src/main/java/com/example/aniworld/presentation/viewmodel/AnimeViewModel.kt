@@ -1,16 +1,13 @@
 package com.example.aniworld.presentation.viewmodel
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.aniworld.data.model.Anime
 import com.example.aniworld.data.repository.AnimeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 
 @HiltViewModel
@@ -18,23 +15,11 @@ class AnimeViewModel @Inject constructor(
     private val repository: AnimeRepository
 ) : ViewModel() {
 
-    private val _animeList = MutableStateFlow<List<Anime>>(emptyList())
-    val animeList: StateFlow<List<Anime>> = _animeList.asStateFlow()
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
+    private val _state = mutableStateOf(AnimeListState())
+    val state: State<AnimeListState> = _state
     
-    private val _currentPage = MutableStateFlow(1)
-    val currentPage: StateFlow<Int> = _currentPage.asStateFlow()
-    
-    private val _hasMorePages = MutableStateFlow(true)
-    val hasMorePages: StateFlow<Boolean> = _hasMorePages.asStateFlow()
-    
-    private val _isLoadingMore = MutableStateFlow(false)
-    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+    private var currentPage = 1
+    private var hasMorePages = true
 
     init {
         loadAnimeList()
@@ -42,49 +27,55 @@ class AnimeViewModel @Inject constructor(
 
     fun loadAnimeList() {
         viewModelScope.launch {
-            _isLoading.value = true
-            _error.value = null
-            _currentPage.value = 1
+            _state.value = AnimeListState(isLoading = true)
+            currentPage = 1
             
             try {
                 val response = repository.getTopAnime(page = 1)
-                _animeList.value = response.animeList
-                _hasMorePages.value = response.pagination.hasNextPage
-                if (response.animeList.isEmpty()) {
-                    _error.value = "No anime found. Please try again later."
-                }
-            } catch (e: HttpException) {
-                _error.value = "API error: " + (if (e.code() == 400) "Service temporarily unavailable" else e.message())
-            } catch (e: IOException) {
-                _error.value = "Network error. Please check your connection."
+                hasMorePages = response.pagination.hasNextPage
+                _state.value = AnimeListState(
+                    animeList = response.animeList
+                )
             } catch (e: Exception) {
-                _error.value = "Failed to load anime: ${e.message}"
-            } finally {
-                _isLoading.value = false
+                _state.value = AnimeListState(
+                    error = "Failed to load anime"
+                )
             }
         }
     }
     
     fun loadMoreAnime() {
-        if (_isLoadingMore.value || !_hasMorePages.value) return
+        if (_state.value.isLoadingMore || !hasMorePages) return
         
         viewModelScope.launch {
-            _isLoadingMore.value = true
+            _state.value = _state.value.copy(isLoadingMore = true)
             
             try {
-                val nextPage = _currentPage.value + 1
+                val nextPage = currentPage + 1
                 val response = repository.getTopAnime(page = nextPage)
                 
-                val currentList = _animeList.value.toMutableList()
+                val currentList = _state.value.animeList.toMutableList()
                 currentList.addAll(response.animeList)
-                _animeList.value = currentList
-                _currentPage.value = nextPage
-                _hasMorePages.value = response.pagination.hasNextPage
+                
+                currentPage = nextPage
+                hasMorePages = response.pagination.hasNextPage
+                
+                _state.value = _state.value.copy(
+                    animeList = currentList,
+                    isLoadingMore = false
+                )
             } catch (e: Exception) {
-                // Silent failure for pagination - just don't load more
-            } finally {
-                _isLoadingMore.value = false
+                _state.value = _state.value.copy(
+                    isLoadingMore = false
+                )
             }
         }
     }
-} 
+}
+
+data class AnimeListState(
+    val isLoading: Boolean = false,
+    val isLoadingMore: Boolean = false,
+    val animeList: List<Anime> = emptyList(),
+    val error: String? = null
+) 
