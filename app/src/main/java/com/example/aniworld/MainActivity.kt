@@ -7,7 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.example.aniworld.presentation.screens.AnimeListScreen
+import androidx.navigation.compose.rememberNavController
+import com.example.aniworld.presentation.navigation.NavGraph
 import com.example.aniworld.ui.theme.AniWorldTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,7 +22,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AnimeListScreen()
+                    val navController = rememberNavController()
+                    NavGraph(navController = navController)
                 }
             }
         }
