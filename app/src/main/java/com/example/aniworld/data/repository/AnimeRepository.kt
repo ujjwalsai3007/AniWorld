@@ -15,4 +15,8 @@ class AnimeRepository @Inject constructor(
     suspend fun getAnimeDetails(id: Int): AnimeDetailResponse {
         return apiService.getAnimeDetails(id)
     }
+    
+    suspend fun searchAnime(query: String, page: Int = 1, limit: Int = 15): AnimeResponse {
+        return apiService.searchAnime(query, page, limit)
+    }
 } 
