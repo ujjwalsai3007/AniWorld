@@ -18,8 +18,15 @@ class AnimeViewModel @Inject constructor(
     private val _state = mutableStateOf(AnimeListState())
     val state: State<AnimeListState> = _state
     
+    private val _searchState = mutableStateOf(SearchState())
+    val searchState: State<SearchState> = _searchState
+    
     private var currentPage = 1
     private var hasMorePages = true
+    
+    private var searchPage = 1
+    private var hasMoreSearchPages = true
+    private var currentSearchQuery = ""
 
     init {
         loadAnimeList()
@@ -71,11 +78,71 @@ class AnimeViewModel @Inject constructor(
             }
         }
     }
+    
+    fun searchAnime(query: String) {
+        if (query.isEmpty()) return
+        
+        viewModelScope.launch {
+            _searchState.value = SearchState(isLoading = true)
+            searchPage = 1
+            currentSearchQuery = query
+            
+            try {
+                val response = repository.searchAnime(query, page = 1)
+                hasMoreSearchPages = response.pagination.hasNextPage
+                _searchState.value = SearchState(
+                    searchResults = response.animeList,
+                    query = query
+                )
+            } catch (e: Exception) {
+                _searchState.value = SearchState(
+                    error = "Failed to search anime: ${e.message}",
+                    query = query
+                )
+            }
+        }
+    }
+    
+    fun loadMoreSearchResults() {
+        if (_searchState.value.isLoadingMore || !hasMoreSearchPages || currentSearchQuery.isEmpty()) return
+        
+        viewModelScope.launch {
+            _searchState.value = _searchState.value.copy(isLoadingMore = true)
+            
+            try {
+                val nextPage = searchPage + 1
+                val response = repository.searchAnime(currentSearchQuery, page = nextPage)
+                
+                val currentList = _searchState.value.searchResults.toMutableList()
+                currentList.addAll(response.animeList)
+                
+                searchPage = nextPage
+                hasMoreSearchPages = response.pagination.hasNextPage
+                
+                _searchState.value = _searchState.value.copy(
+                    searchResults = currentList,
+                    isLoadingMore = false
+                )
+            } catch (e: Exception) {
+                _searchState.value = _searchState.value.copy(
+                    isLoadingMore = false
+                )
+            }
+        }
+    }
 }
 
 data class AnimeListState(
     val isLoading: Boolean = false,
     val isLoadingMore: Boolean = false,
     val animeList: List<Anime> = emptyList(),
+    val error: String? = null
+)
+
+data class SearchState(
+    val isLoading: Boolean = false,
+    val isLoadingMore: Boolean = false,
+    val searchResults: List<Anime> = emptyList(),
+    val query: String = "",
     val error: String? = null
 ) 

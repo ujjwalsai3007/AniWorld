@@ -2,6 +2,7 @@ package com.example.aniworld.presentation.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -29,11 +30,15 @@ import com.example.aniworld.presentation.viewmodel.AnimeViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import android.util.Log
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnimeListScreen(
     onAnimeClick: (Int) -> Unit = {},
+    onSearchClick: () -> Unit = {},
     viewModel: AnimeViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.value
@@ -72,7 +77,7 @@ fun AnimeListScreen(
                 }
             } else {
                 Column(modifier = Modifier.fillMaxSize()) {
-                    // Header with refresh button
+                    // Header with buttons
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -83,14 +88,53 @@ fun AnimeListScreen(
                         Text(
                             "Top Anime (${state.animeList.size})",
                             style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
                         )
                         
                         // Refresh button
-                        IconButton(onClick = { viewModel.loadAnimeList() }) {
+                        IconButton(
+                            onClick = { 
+                                Log.d("AnimeListScreen", "Refresh button clicked")
+                                viewModel.loadAnimeList() 
+                            }
+                        ) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
                                 contentDescription = "Refresh"
+                            )
+                        }
+                    }
+                    
+                    // Search bar
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .clickable { 
+                                Log.d("AnimeListScreen", "Search bar clicked")
+                                onSearchClick()
+                            },
+                        shape = RoundedCornerShape(24.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        tonalElevation = 2.dp
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Search anime...",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
