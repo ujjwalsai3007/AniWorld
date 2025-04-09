@@ -94,3 +94,4 @@ com.example.aniworld/
 ## Credits
 
 - [Jikan API](https://jikan.moe/) - Unofficial MyAnimeList API
+- API Endpoint for Top Anime: https://api.jikan.moe/v4/top/anime
